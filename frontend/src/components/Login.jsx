@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useRef, useState, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -8,7 +6,7 @@ import axios from "../api/axios";
 const LOGIN_URL = "/auth";
 
 const Login = () => {
-  const { setAuth } = useAuth();
+  const { setAuth, persist, setPersist } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,21 +28,19 @@ const Login = () => {
   }, [user, pwd]);
 
   const handleSubmit = async (e) => {
-    // we dont need to use the event object, so we can remove it
     e.preventDefault();
+
     try {
       const response = await axios.post(
         LOGIN_URL,
         JSON.stringify({ user, pwd }),
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
       console.log(JSON.stringify(response?.data));
-      // console.log(JSON.stringify(response));
+      //console.log(JSON.stringify(response));
       const accessToken = response?.data?.accessToken;
       const roles = response?.data?.roles;
       setAuth({ user, pwd, roles, accessToken });
@@ -65,6 +61,14 @@ const Login = () => {
     }
   };
 
+  const togglePersist = () => {
+    setPersist((prev) => !prev);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("persist", persist);
+  }, [persist]);
+
   return (
     <section>
       <p
@@ -81,21 +85,30 @@ const Login = () => {
           type="text"
           id="username"
           ref={userRef}
-          //   this is used , when we load the page, the cursor will be in the username field
           autoComplete="off"
           onChange={(e) => setUser(e.target.value)}
           value={user}
           required
         />
+
         <label htmlFor="password">Password:</label>
         <input
           type="password"
           id="password"
-          value={pwd}
           onChange={(e) => setPwd(e.target.value)}
+          value={pwd}
           required
         />
-        <button type="submit">Sign In </button>
+        <button>Sign In</button>
+        <div className="persistCheck">
+          <input
+            type="checkbox"
+            id="persist"
+            onChange={togglePersist}
+            checked={persist}
+          />
+          <label htmlFor="persist">Trust This Device</label>
+        </div>
       </form>
       <p>
         Need an Account?
