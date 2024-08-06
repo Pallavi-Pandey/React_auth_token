@@ -12,6 +12,12 @@ import Missing from "./components/Missing";
 import RequireAuth from "./components/RequireAuth";
 import { Routes, Route } from "react-router-dom";
 
+const ROLES = {
+  ADMIN: 5150,
+  EDITOR: 1984,
+  USER: 2001,
+};
+
 function App() {
   return (
     <Routes>
@@ -23,10 +29,19 @@ function App() {
         <Route path="unauthorized" element={<Unauthorized />} />
 
         {/* protected routes */}
-        <Route element={<RequireAuth />}>
+        <Route element={<RequireAuth allowedRoles={[ROLES.User]}/>}>
           <Route path="/" element={<Home />} />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={[ROLES.Editor]}/>}>
           <Route path="editor" element={<Editor />} />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={[ROLES.Admin]}/>}>
           <Route path="admin" element={<Admin />} />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={[ROLES.Editor, ROLES.Admin]}/>}>
           <Route path="louge" element={<Lounge />} />
         </Route>
 
