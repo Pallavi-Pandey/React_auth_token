@@ -7,16 +7,16 @@ import {
   faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router-dom";
 
-const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 // overall it will be 4 to 24 characters long
-const PWD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])[\w!@#\$%\^&\*]{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
+const REGISTER_URL = "/register";
 
 const Register = () => {
-  const userRef = useRef(null);
-  const errRef = useRef(null);
-  // useRefs are used to access the DOM elements directly, without using the event object, in this case, the input element and the error message element, respectively, are accessed directly, without using the event object to access them indirectly,
+  const userRef = useRef();
+  const errRef = useRef();
 
   const [user, setUser] = useState("");
   const [validName, setValidName] = useState(false);
@@ -33,27 +33,18 @@ const Register = () => {
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const REGISTER_URL = "/register";
-
   useEffect(() => {
     userRef.current.focus();
   }, []);
   // it going to be setting the focus when the component loads on the user input field
 
   useEffect(() => {
-    const result = USER_REGEX.test(user);
-    console.log(result);
-    console.log(user);
-    setValidName(result);
+    setValidName(USER_REGEX.test(user));
   }, [user]);
 
   useEffect(() => {
-    const result = PWD_REGEX.test(pwd);
-    console.log(result);
-    console.log(pwd);
-    setValidPwd(result);
-    const match = pwd === matchPwd;
-    setValidMatch(match);
+    setValidPwd(PWD_REGEX.test(pwd));
+    setValidMatch(pwd === matchPwd);
   }, [pwd, matchPwd]);
 
   useEffect(() => {
@@ -66,8 +57,8 @@ const Register = () => {
     // if the button was enabled with js hack
     const v1 = USER_REGEX.test(user);
     const v2 = PWD_REGEX.test(pwd);
-    if (!v1 || !v2 || pwd !== matchPwd) {
-      setErrMsg("Invalid input. Please check the fields.");
+    if (!v1 || !v2) {
+      setErrMsg("Invalid Entry");
       return;
     }
     try {
@@ -82,15 +73,15 @@ const Register = () => {
       console.log(response.data);
       console.log(response.accessToken);
       console.log(JSON.stringify(response));
+      console.log(JSON.stringify(response?.data));
       setSuccess(true);
       // clear input fields
       setUser("");
       setPwd("");
       setMatchPwd("");
-      userRef.current.focus();
     } catch (err) {
       if (!err?.response) {
-        setErrMsg("No server Response");
+        setErrMsg("No Server Response");
       } else if (err.response?.status === 409) {
         setErrMsg("Username Taken");
       } else {
@@ -123,12 +114,14 @@ const Register = () => {
           <form onSubmit={handleSubmit}>
             <label htmlFor="username">
               Username:
-              <span className={validName ? "valid" : "hide"}>
-                <FontAwesomeIcon icon={faCheck} />
-              </span>
-              <span className={validName || !user ? "hide" : "invalid"}>
-                <FontAwesomeIcon icon={faTimes} />
-              </span>
+              <FontAwesomeIcon
+                icon={faCheck}
+                className={validName ? "valid" : "hide"}
+              />
+              <FontAwesomeIcon
+                icon={faTimes}
+                className={validName || !user ? "hide" : "invalid"}
+              />
             </label>
             <input
               type="text"
@@ -136,6 +129,7 @@ const Register = () => {
               ref={userRef}
               autoComplete="off"
               onChange={(e) => setUser(e.target.value)}
+              value={user}
               required
               aria-invalid={validName ? "false" : "true"}
               aria-describedby="uidnote"
@@ -156,53 +150,60 @@ const Register = () => {
 
             <label htmlFor="password">
               Password:
-              <span className={validPwd ? "valid" : "hide"}>
-                <FontAwesomeIcon icon={faCheck} />
-              </span>
-              <span className={validPwd || !pwd ? "hide" : "invalid"}>
-                <FontAwesomeIcon icon={faTimes} />
-              </span>
+              <FontAwesomeIcon
+                icon={faCheck}
+                className={validPwd ? "valid" : "hide"}
+              />
+              <FontAwesomeIcon
+                icon={faTimes}
+                className={validPwd || !pwd ? "hide" : "invalid"}
+              />
             </label>
             <input
               type="password"
               id="password"
               onChange={(e) => setPwd(e.target.value)}
+              value={pwd}
               required
               aria-invalid={validPwd ? "false" : "true"}
               aria-describedby="pwdnote"
               onFocus={() => setPwdFocus(true)}
               onBlur={() => setPwdFocus(false)}
             />
-            {/* we dont have auto complete because it is not supported in password fields
-        also we dont have a reference to the password field because we are not going to be setting the focus on the password field */}
             <p
               id="pwdnote"
               className={pwdFocus && !validPwd ? "instructions" : "offscreen"}
             >
               <FontAwesomeIcon icon={faInfoCircle} />
-              8 to 24 characters long. <br />
-              Must contain at least one uppercase letter, one lowercase letter,
-              one number, and one special character. Allowed special characters
-              are : <span aria-label="exclamation mark">!</span>
-              <span aria-label="at sign">@</span>
-              <span aria-label="hashtag">#</span>
-              <span aria-label="dollar sign">$</span>
-              <span aria-label="percent sign">%</span>
+              8 to 24 characters.
+              <br />
+              Must include uppercase and lowercase letters, a number and a
+              special character.
+              <br />
+              Allowed special characters:{" "}
+              <span aria-label="exclamation mark">!</span>{" "}
+              <span aria-label="at symbol">@</span>{" "}
+              <span aria-label="hashtag">#</span>{" "}
+              <span aria-label="dollar sign">$</span>{" "}
+              <span aria-label="percent">%</span>
             </p>
 
             <label htmlFor="confirm_pwd">
               Confirm Password:
-              <span className={validMatch && matchPwd ? "valid" : "hide"}>
-                <FontAwesomeIcon icon={faCheck} />
-              </span>
-              <span className={validMatch || !matchPwd ? "hide" : "invalid"}>
-                <FontAwesomeIcon icon={faTimes} />
-              </span>
+              <FontAwesomeIcon
+                icon={faCheck}
+                className={validMatch && matchPwd ? "valid" : "hide"}
+              />
+              <FontAwesomeIcon
+                icon={faTimes}
+                className={validMatch || !matchPwd ? "hide" : "invalid"}
+              />
             </label>
             <input
               type="password"
               id="confirm_pwd"
               onChange={(e) => setMatchPwd(e.target.value)}
+              value={matchPwd}
               required
               aria-invalid={validMatch ? "false" : "true"}
               aria-describedby="confirmnote"
@@ -228,8 +229,7 @@ const Register = () => {
           <p>
             Already Registered? <br />
             <span className="line">
-              {/* put router link here */}
-              <a href="#">Sign In</a>
+              <Link to="/">Sign In</Link>
             </span>
           </p>
         </section>
