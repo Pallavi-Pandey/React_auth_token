@@ -70,8 +70,35 @@ const Register = () => {
       setErrMsg("Invalid input. Please check the fields.");
       return;
     }
-    console.log(user, pwd);
-    setSuccess(true);
+    try {
+      const response = await axios.post(
+        REGISTER_URL,
+        JSON.stringify({ user, pwd }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      console.log(response.data);
+      console.log(response.accessToken);
+      console.log(JSON.stringify(response));
+      setSuccess(true);
+      // clear input fields
+      setUser("");
+      setPwd("");
+      setMatchPwd("");
+      userRef.current.focus();
+    } catch (err) {
+      if (!err?.response) {
+        setErrMsg("No server Response");
+      } else if (err.response?.status === 409) {
+        setErrMsg("Username Taken");
+      } else {
+        setErrMsg("Registration Failed");
+      }
+      errRef.current.focus();
+      // this is for screen readers
+    }
   };
 
   return (

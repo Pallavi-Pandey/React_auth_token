@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Register from "./Register";
+import Register from "./components/Register";
 
 function App() {
   return (
