@@ -13,9 +13,9 @@ import RequireAuth from "./components/RequireAuth";
 import { Routes, Route } from "react-router-dom";
 
 const ROLES = {
-  ADMIN: 5150,
-  EDITOR: 1984,
-  USER: 2001,
+  Admin: 5150,
+  Editor: 1984,
+  User: 2001,
 };
 
 function App() {
